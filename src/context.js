@@ -6,11 +6,11 @@ const extensions = []
 const configuration = {}
 const definitions = {}
 const PluginInterface = [
-  'extend', // extend created class
+  'extend', // a function that will be invoked when new context class is  created
   'name', // registration name
   'description',
-  'initialize', // on class initialization
-  'reset'// on context reset
+  'initialize', // a function that will be invoked on class initialization
+  'reset'// a function that will be invoked on context reset
 ]
 
 function registerHook(name) {
@@ -53,12 +53,12 @@ class Base {
 }
 
 export default {
-  hooks,
-  Base,
-  configuration,
-  definitions,
+  get Base() { return Base },
+  get hooks() { return hooks },
+  get configuration() { return configuration },
+  get definitions() { return definitions },
   get extensions() { return extensions },
-  use(ext) {
+  use(ext, ...args) {
     assert(ext.name, 'missing plugin name')
 
     if (extensions.find(e => e.name === ext.name)) {
@@ -80,11 +80,12 @@ export default {
     }
 
     if (ext.install) {
-      ext.install(this)
+      ext.install(this, ...args)
     }
 
     PluginInterface.filter(n => ext[n])
 
+    // reduce object with interface properties
     extensions.push(
       PluginInterface.reduce((prev, fn) => ({ ...prev, [fn]: ext[fn] }), {})
     )
@@ -99,8 +100,10 @@ export default {
     assert(definition, `definition ${name} not found`)
 
     Context.definition = definition
+    Context.configuration = configuration
     Context._$factory = this
 
+    // invoke extend fn on every plugin with new class
     extensions.filter(e => e.extend).forEach(e => e.extend(Context, options))
 
     return Context

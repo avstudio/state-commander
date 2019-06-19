@@ -1,6 +1,6 @@
 {
   "name": "state-commander",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "state management and application framework",
   "main": "dist/state-commander.common.js",
   "module": "dist/state-commander.esm.js",
@@ -15,7 +15,8 @@
     "lint": "eslint src tests",
     "test": "export NODE_ENV=testing && jest",
     "docs:dev": "vuepress dev docs",
-    "docs:build": "vuepress build docs"
+    "docs:build": "vuepress build docs",
+    "docs:deploy": "npm run docs:build && heroku static:deploy"
   },
   "author": "Aleksandar Vucic",
   "license": "MIT",

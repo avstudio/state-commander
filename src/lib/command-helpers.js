@@ -5,7 +5,6 @@ const createHelperName = (
   custom, prefix, registrationKey
 ) => custom || makeHelperName(`${prefix || ''}/${registrationKey}`)
 
-
 const registerCommandHook = ({ command }, mdl, next) => {
   const { context } = mdl
   // init map if does not exists
@@ -73,14 +72,14 @@ export default {
 
     assert(Context.State, 'Missing State which is required by Command Helpers')
 
-    // attach to hook for command registration
-    Context.hooks['module:register'].attach(registerCommandHook)
-    Context.hooks['module:unregister'].attach(unregisterCommandHook)
+    // attach handler on the command registration hook
+    Context.hooks['module:registerCommand'].attach(registerCommandHook)
+    Context.hooks['module:unregisterCommand'].attach(unregisterCommandHook)
 
     Context.Base.prototype.getHelpers = getHelpers
   },
   initialize(context) {
-    // prevent user to define GET prefix because it is used here in construction of getter helper name
+    // prevent developer to define GET prefix because it is used here in construction of getter helper name
     assert(
       !Object.values(context.constructor.definition).some(el => /get/i.test(el.prefix)),
       'prefix GET is reserved and used by CommandHelpers module. Please consider to define different prefix in context definition'

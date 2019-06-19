@@ -29,20 +29,30 @@ class MyCommand2 {
 State for this module will be registered and merged as:
 
 ```js
-context._state['some/module']; // {value1:'foo',value2:'bar'}
+context.state['some/module']; // {value1:'foo',value2:'bar'}
 ```
 
 Within the state registration process,
-this data will be used for creating new objects with `buildState()` factory.
+this data will be used for creating new objects with `buildState()` and `setState()` factory.
 
 ## Configuration:
 
-- `buildState(state:Object):Object` - factory for state objects
+- `buildState(state:Object):Object` -
+
+  Set root state objects
+
+- `setState(state:Object,key:String, properties:Object)`
+
+  Assign new nested properties to the state object recursively
+
+  ::: warning
+  this will mutate given `state`
+  :::
 
 ::: tip NOTE
 In default implementation, this method will return the plain JS Object.
-In some other implementations, like [VueContext](/plugins/vue-context.md) with `Vue.observable`
-will return state object with additional logic to support its reactive nature.
+In some other implementations, like [VueContext](/plugins/vue-context.md) with `Vue.observable` and
+`Vue.set` will return state object with additional logic to support its reactive nature.
 :::
 
 ## Hooks
@@ -91,6 +101,11 @@ class MyCommand {
     ...
   }
   ```
+  You can retrieve module state by module `namespace`:
+
+  ```js
+  context.state['some/module'];
+  ```
 
 ### state
 
@@ -100,7 +115,9 @@ Will return context state object from all registered modules.
 
 ### registerState
 
-- `registerState(key:String, state:Object)`
+- `registerState(key:String, state:Object,options?:Object)`
+
+Options can have `override: true`  to force (override) new object for given key
 
 ::: tip NOTE
 State registration process is done through `module` / `command` registration.

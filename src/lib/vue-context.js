@@ -1,9 +1,5 @@
-import Vue from 'vue'
-import { assert } from '../utils'
-
 function vueContextInit() {
   const options = this.$options
-  // context injection
   if (options.context) {
     this.$context = typeof options.context === 'function'
       ? options.context()
@@ -13,18 +9,23 @@ function vueContextInit() {
   }
 }
 
-export const VueContextInstall = {
-  install(_Vue) {
-    if (Vue && _Vue === Vue) {
-      if (process.env.NODE_ENV !== 'production') {
-        assert(
-          false,
-          '[VueContext] already installed. Vue.use(VueContext) should be called only once.'
-        )
-      }
-      return
-    }
-    const Vue = _Vue
+//  recursion to set a deep property on an object and hook it into the Vue reactivity system
+function setState(state, key, value) {
+  if (!state[key]) {
+    this.set(state, key, {})
+  }
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    Object.entries(value).forEach(([k, item]) => {
+      setState.call(this, state[key], k, item)
+    })
+  } else {
+    // eslint-disable-next-line no-param-reassign
+    state[key] = value
+  }
+}
+
+const VuePlugin = {
+  install(Vue) {
     Vue.mixin({
       beforeCreate: vueContextInit
     })
@@ -34,8 +35,13 @@ export const VueContextInstall = {
 export default {
   name: 'VueContext',
   description: 'Connect State Commander with Vue',
-  install(ContextFactory) {
-    const Context = ContextFactory
+  install(_Context, { vue: Vue }) {
+    const Context = _Context
     Context.configuration.state.buildState = (state = {}) => Vue.observable(state)
+    Context.configuration.state.setState = (
+      state, key, value
+    ) => setState.call(Vue, state, key, value)
+    // set context object in Vue
+    Vue.use(VuePlugin)
   }
 }

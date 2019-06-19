@@ -9,7 +9,8 @@ import Stats from './lib/stats'
 import ModuleInheritance from './lib/module-inheritance'
 import ModuleMapper from './lib/module-mapper'
 import CommandHelpers from './lib/command-helpers'
-import VueContext, { VueContextInstall } from './lib/vue-context'
+import VueContext from './lib/vue-context'
+import Logger from './lib/logger'
 
 Context.use(DefaultDefinition)
 Context.use(CommandDispatcher)
@@ -22,9 +23,9 @@ export {
   ModuleMapper,
   CommandHelpers,
   VueContext,
-  VueContextInstall,
   makeHelperName,
   makeRegistrationKey,
   Context,
-  Stats
+  Stats,
+  Logger
 }

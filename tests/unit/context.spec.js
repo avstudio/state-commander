@@ -188,7 +188,7 @@ describe('Context ', () => {
         ).toThrow(/definition is empty/)
       })
 
-      it('should throw error action is empty', () => {
+      it('should throw error when action is empty', () => {
         Context.definitions.someDefinition = {}
         const plugin = {
           name: 'Plugin',

@@ -2,13 +2,13 @@ import { assert, isPromise } from '../utils'
 
 const hooks = {}
 const configuration = { }
+
 // todo improve this
-const patternKeyRegex = pattern => new RegExp(
+const patternToRegex = pattern => new RegExp(
   /\/*/.test(pattern) ? pattern.replace('*', '(.*?)') : 'a^'
 )
 
 const defaultNotFoundHandler = e => assert(false, `Command not found ${e}`)
-
 
 function _callCommandSync(map, event, payload) {
   let res
@@ -42,7 +42,7 @@ function _callCommand(map, event, payload) {
 
 function _callAllCommands(map, event, data) {
   if (/\/*/.test(event)) {
-    const reg = patternKeyRegex(event)
+    const reg = patternToRegex(event)
     return Promise.all(Object.keys(map).reduce((prev, key) => {
       if (reg.test(key)) {
         prev.push(this._callCommand(map, key, data))

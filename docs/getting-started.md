@@ -210,15 +210,13 @@ class SavePost {
       return Promise.reject('You are not authorized')
     }
 
-    return new Promise(( resolve,reject )=>{
-      fetch('https://api.ulr.com/posts', {
+      return fetch('https://api.ulr.com/posts', {
         method: 'post',
         body: JSON.stringify({ post:this.post })
       }).then((res) => {
         this.commit()
         resolve(this.post)
       }).catch(reject)
-    })
   }
 
   _clearState(){

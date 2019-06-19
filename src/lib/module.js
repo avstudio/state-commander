@@ -26,7 +26,7 @@ class Base {
     assert(definition, 'Missing context definition')
     assert(Handler, 'Handler extension is required')
 
-    hooks['module:register'].execute(
+    hooks['module:registerCommand'].execute(
       { command: Command },
       this,
       () => {
@@ -58,7 +58,7 @@ class Base {
 
     assert(definition, 'Missing context definition')
 
-    hooks['module:unregister'].execute(
+    hooks['module:unregisterCommand'].execute(
       { command: Command },
       this,
       () => {
@@ -99,11 +99,16 @@ function registerModule(m, { commands = [] } = {}) {
     ? this.constructor.Module.create(this, m, { commands })
     : m
 
-  const key = newModule.registrationKey
-  assert(key, 'registration key is missing')
-  assert(!this._modules[key], 'module already exists')
+  hooks['module:register'].execute(
+    { module: newModule },
+    this, () => {
+      const key = newModule.registrationKey
+      assert(key, 'registration key is missing')
+      assert(!this._modules[key], 'module already exists')
 
-  this._modules[key] = newModule
+      this._modules[key] = newModule
+    }
+  )
   return newModule
 }
 
@@ -114,12 +119,18 @@ function unregisterModule(m) {
   )
   const mdl = m.registrationKey ? m : this.getModule(m)
   if (!mdl) { return }
-  mdl.unregisterAllCommands()
-  delete this._modules[mdl.registrationKey]
+
+  hooks['module:unregister'].execute(
+    { module: mdl },
+    this, () => {
+      mdl.unregisterAllCommands()
+      delete this._modules[mdl.registrationKey]
+    }
+  )
 }
 
 const ModuleFactory = {
-  Base,
+  get Base() { return Base },
   create(context, path,
     {
       commands = [],
@@ -169,7 +180,12 @@ const ModuleFactory = {
 
 export default {
   name: 'Module',
-  hooks: ['module:register', 'module:unregister'],
+  hooks: [
+    'module:register',
+    'module:unregister',
+    'module:registerCommand',
+    'module:unregisterCommand',
+  ],
   configuration,
   install(ContextFactory) {
     const Context = ContextFactory
@@ -178,6 +194,8 @@ export default {
     // keep reference
     hooks['module:register'] = Context.hooks['module:register']
     hooks['module:unregister'] = Context.hooks['module:unregister']
+    hooks['module:registerCommand'] = Context.hooks['module:registerCommand']
+    hooks['module:unregisterCommand'] = Context.hooks['module:unregisterCommand']
 
     Context.Base.Module = Context.Module
     Context.Base.prototype.getModule = getModule

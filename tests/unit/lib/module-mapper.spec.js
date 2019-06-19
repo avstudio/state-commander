@@ -15,12 +15,25 @@ Context.use(ModuleMapper)
 const ContextClass = Context.createClass()
 
 describe('ModuleMapper', () => {
-  it('should parse modueMap input', () => {
+  it('should parse module Map input', () => {
     const context = new ContextClass(
       {
         'some/module': {
           state: {
-            value: 'some'
+            value1: 'value1',
+            value2: 'value2'
+          },
+          commands: [
+            makeClass('Command').onInstance({
+              execute() { },
+              commit() { }
+            }).build()
+          ]
+        },
+        'some/module2': {
+          state: {
+            value1: 'value1',
+            value2: 'value2'
           },
           commands: [
             makeClass('Command').onInstance({
@@ -31,8 +44,16 @@ describe('ModuleMapper', () => {
         }
       }
     )
-    const mdl = context._modules['some/module']
-    expect(context._state[mdl.namespace].value).toBe('some')
-    expect(mdl.getCommands().length).toBe(1)
+    const mdl1 = context._modules['some/module']
+    const mdl2 = context._modules['some/module2']
+
+    expect(context.state[mdl1.namespace].value1).toBe('value1')
+    expect(context.state[mdl1.namespace].value2).toBe('value2')
+
+    expect(context.state[mdl2.namespace].value1).toBe('value1')
+    expect(context.state[mdl2.namespace].value2).toBe('value2')
+
+    expect(mdl1.getCommands().length).toBe(1)
+    expect(mdl2.getCommands().length).toBe(1)
   })
 })

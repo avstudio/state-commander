@@ -13,10 +13,8 @@ import App from './App.vue';
 //some commands
 import * as commands from './commands';
 
-Context.use(VueContext);
-
-//support for Vue to register context object reference
-Vue.use(VueContextInstall);
+//pass Vue instance as second param to install context object
+Context.use(VueContext,{ vue });
 
 //create Context class with defaults
 const ContextClass = Context.createClass();

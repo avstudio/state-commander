@@ -1,6 +1,7 @@
-![State Commander](logo.svg)
+![State Commander](docs/.vuepress/public/logo.svg)
 
 # State Commander
-JS Library for state management
+
+JS Library for application state management
 
 ## More info soon

@@ -1,7 +1,8 @@
 import { assert } from '../utils'
 
 const configuration = {
-  buildState: (state = {}) => state
+  buildState: (state = {}) => state,
+  setState: (oldState, key, value) => Object.assign(oldState, { [key]: value })
 }
 
 const hooks = { }
@@ -14,7 +15,7 @@ function initState(contextInstance, force = false) {
   }
 }
 
-function registerState(key, state) {
+function registerState(key, state, { override = false } = {}) {
   assert(key, 'missing key for state registration')
 
   initState(this)
@@ -23,8 +24,9 @@ function registerState(key, state) {
     { key, state },
     this,
     () => {
-      assert(!this._state[key], `state for ${key} already exists `)
-      Object.assign(this._state, { [key]: state })
+      assert(!(override === !1 && this._state[key]), `state for ${key} already exists `)
+
+      configuration.setState(this._state, key, state)
     }
   )
 }
@@ -34,10 +36,36 @@ function unregisterState(key) {
     { key },
     this,
     () => {
+      delete this.getters[key]
+
+      Object.getOwnPropertyNames(this.getters).forEach((k) => {
+        if (k.startsWith(key)) {
+          delete this.getters[k]
+        }
+      })
+
       delete this._state[key]
-      this._state = { ...this._state }
     }
   )
+}
+
+const registerHook = ({ module: mdl }, context, next) => {
+  // first time
+  initState(context)
+  // let module to the things first
+  next()
+
+  const key = mdl.registrationKey
+
+  // register module if it's not already registered
+  if (!context.state[key]) {
+    context.registerState(key, {})
+  }
+}
+
+const unregisterHook = ({ module: mdl }, context, next) => {
+  next()
+  mdl.context.unregisterState(mdl.registrationKey)
 }
 
 const registerCommandHook = ({ command }, mdl, next) => {
@@ -55,7 +83,7 @@ const registerCommandHook = ({ command }, mdl, next) => {
 
   const mKey = mdl.registrationKey
 
-  // register module if it's not already registered
+  // register module if doesn't exists
   if (!rootState[mKey]) {
     mdl.context.registerState(mKey, {})
   }
@@ -66,30 +94,37 @@ const registerCommandHook = ({ command }, mdl, next) => {
   Object.keys(state).forEach(
     (key) => {
       if (!mState[key]) {
-        const obsItem = state[key]
-        mState[key] = typeof obsItem === 'object'
-          ? configuration.buildState(obsItem)
-          : obsItem
+        const desc = Object.getOwnPropertyDescriptor(state, key)
+        // TODO rethink this
+        // check if state property is not only getter
+        if (desc.writable) {
+        // use setter function from configuration
+          configuration.setState(mState, key, state[key])
+        } else {
+          // define getter only
+          Object.defineProperty(mState, key, desc)
+        }
       }
     }
   )
 
   // build state with factory and set to the instance
-  Command.prototype.state = configuration.buildState(mState)
+  Command.prototype.state = mState
 
   // register command getter
   if (!getters[registrationKey] && typeof Command.prototype.getter === 'function') {
     Object.defineProperty(getters, registrationKey, {
       get() {
         return new Command().getter()
-      }
+      },
+      configurable: true
     })
   }
 }
 
 const unregisterCommandHook = ({ command }, mdl, next) => {
   next()
-  mdl.context.unregisterState(command.registrationKey, command.state)
+  mdl.context.unregisterState(command.registrationKey)
 }
 
 export default {
@@ -116,9 +151,11 @@ export default {
     hooks['state:register'] = Context.hooks['state:register']
     hooks['state:unregister'] = Context.hooks['state:unregister']
 
-    // attach to hook for command registration
-    Context.hooks['module:register'].attach(registerCommandHook)
-    Context.hooks['module:unregister'].attach(unregisterCommandHook)
+    // attach handlers on the command registration hook to set the state
+    Context.hooks['module:register'].attach(registerHook)
+    Context.hooks['module:unregister'].attach(unregisterHook)
+    Context.hooks['module:registerCommand'].attach(registerCommandHook)
+    Context.hooks['module:unregisterCommand'].attach(unregisterCommandHook)
   },
   initialize(context) {
     initState(context)

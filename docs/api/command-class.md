@@ -1,6 +1,6 @@
 # Command Class
 
-Command class represent the way to encapsulate handling state logic (or part of the module state).
+Command class represent the way to encapsulate and handle state logic under `module` (or part of the `module` state).
 
 Every time when context handler ivnoke command, it will create new CommandClass instance and call
 related instance method.
@@ -82,3 +82,45 @@ See more about [Command Helpers](/plugins/official-plugins.md#command-helpers) p
 ## Invoking commands
 
 For more information about see: [invoking commands](/api/definition.html#invoking-commands)
+
+## Command Inheritance
+
+Just idea how you can use `class` Inheritance to reuse functionality
+between you commands.
+
+```js
+class Base{
+  static get state(){
+    return {
+      documents:[],
+      document:null,
+      //...
+      //common state data in one place
+    }
+  }
+  //not recognized by State Commander
+  fetchData(){
+    client.get('...')
+  }
+
+  //not recognized by State Commander
+  createDocument(){
+    client.post('...')
+  }
+  ...
+}
+
+class CreateDocument extends Base {
+  //this is recognized by State Commander
+  commit(){
+    this.createDocument()
+  }
+}
+
+class GetDocument extends Base {
+  //this is recognized by State Commander
+  execute(){
+    this.fetchData()
+  }
+}
+```

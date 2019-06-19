@@ -33,7 +33,7 @@
 
 - type: `Object`
 
-  Hold `configuration` options for all installed extensions
+  Getter that holds `configuration` options for all installed extensions
 
   ```js
   const myPlugin = {
@@ -57,7 +57,7 @@ See more about [Creating Plugins](/plugins/README.md)
 
 - type: `Object`
 
-  Templates for Context instance object
+  Getter that holds  "templates" for creating `Context` instance object
 
   See more about [Definition](/api/definition.md)
 
@@ -89,7 +89,7 @@ See more about [Creating Plugins](/plugins/README.md)
 
 - `Context.hooks[hookName:String].attach(handler:Function)`
 
-Hooks are middleware functions and can be used for plugin functionality.
+Getter that holds Hooks / middleware functions and can be used for plugin functionality.
 
 ::: warning NOTE
 Hooks are meant to be used only for plugin development and not for direct use.

@@ -12,6 +12,8 @@ Represent factory for creating context modules.
 
 - `module:register` - will be executed when module is registered
 - `module:unregister` - will be executed when module is unregistered
+- `module:registerCommand` - will be executed when command is registered
+- `module:unregisterCommand` - will be executed when command is unregistered
 
   [See more about hooks](/plugins.md#hooks)
 

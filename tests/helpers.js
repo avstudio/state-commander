@@ -34,9 +34,25 @@ export const makeClass = (name) => {
 }
 
 export const resetContext = (Context) => {
+  const hooks = {}
+  const configuration = {}
+  const definitions = {}
   const C = Context
+
   C.extensions.length = 0
-  C.hooks = {}
-  C.configuration = {}
-  C.definitions = {}
+  Object.defineProperty(C, 'definitions', {
+    get() {
+      return definitions
+    }
+  })
+  Object.defineProperty(C, 'hooks', {
+    get() {
+      return hooks
+    }
+  })
+  Object.defineProperty(C, 'configuration', {
+    get() {
+      return configuration
+    }
+  })
 }

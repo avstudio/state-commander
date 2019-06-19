@@ -72,6 +72,55 @@ describe('State', () => {
     expect(context._state['some/module'].value).toBe('some')
   })
 
+  it('should not override existing value', () => {
+    context.registerState('foo', { value: 'old' })
+
+    const mdl = context.registerModule('foo')
+    const Command = makeClass('Command')
+      .onInstance({
+        getter() {
+          return this.state.value
+        }
+      })
+      .onClass({
+        get state() {
+          return { value: 'new' }
+        }
+      })
+      .build()
+
+    mdl.registerCommand(Command)
+
+    expect(context._state.foo.value).toBe('old')
+  })
+
+  it('should define (clone) property getter from class static state definition', () => {
+    const Command = makeClass('Command')
+      .onInstance({
+        execute() { },
+        commit() { }
+      })
+      .onClass({
+        get state() {
+          return {
+            get foo() {
+              return 'foo'
+            },
+            bar: 'bar'
+          }
+        }
+      })
+      .build()
+    let desc
+
+    context.registerModule('moduleFoo', { commands: [Command] })
+    desc = Object.getOwnPropertyDescriptor(context.state.modulefoo, 'foo')
+    expect(desc.writable).toBeUndefined()
+
+    desc = Object.getOwnPropertyDescriptor(context.state.modulefoo, 'bar')
+    expect(desc.writable).toBe(true)
+  })
+
   it('should register state for root module', () => {
     const mdl = context._modules.root
     const Command = makeClass('Command')
@@ -117,7 +166,9 @@ describe('State', () => {
     const mdl = context.registerModule('some/module')
     const Command = makeClass('Command')
       .onInstance({
-        getter() { }
+        getter() {
+          return this.state.value
+        }
       })
       .onClass({
         get state() {
@@ -127,6 +178,9 @@ describe('State', () => {
       .build()
 
     mdl.registerCommand(Command)
+
+    expect(context._state['some/module']).toBeDefined()
+
     context.unregisterModule(mdl)
 
     expect(context._state['some/module/command']).toBeUndefined()

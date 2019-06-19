@@ -20,7 +20,7 @@ class Base {
 }
 
 const HandlerFactory = {
-  Base,
+  get Base() { return Base },
   createClass() {
     const Handler = class extends this.Base { }
     return Handler

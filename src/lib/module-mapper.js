@@ -4,18 +4,17 @@ export default {
   initialize(context, options) {
     this.reset(context, options)
   },
-  reset(context, options) {
+  reset(context, options = {}) {
     Object.entries(options).forEach(([
       path, {
         state,
         commands = []
       } = {}]) => {
-      if (state) {
-        const mdl = context.registerModule(path, { commands, state })
+      const mdl = context.registerModule(path, { commands })
 
-        // "override" if already exists
-        context.unregisterState(mdl.namespace)
-        context.registerState(mdl.namespace, state)
+      // "override" if already exists
+      if (state) {
+        context.registerState(mdl.namespace, state, { override: true })
       }
     })
   }

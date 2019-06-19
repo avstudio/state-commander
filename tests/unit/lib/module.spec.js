@@ -31,6 +31,22 @@ describe('Module', () => {
     })
 
     describe('Context#registerModule', () => {
+      it('should call register hook', () => {
+        const before = jest.fn()
+        const after = jest.fn()
+
+        Context.hooks['module:register'].attach((data, _, next) => {
+          before()
+          next()
+          after()
+        })
+        context.registerModule('some/path')
+        context.unregisterModule('some/path')
+
+        expect(before).toBeCalled()
+        expect(after).toBeCalled()
+      })
+
       it('should throw error if argument is not string or instance of Module', () => {
         expect(
           () => context.registerModule(makeClass('Invalid').build())
@@ -64,6 +80,22 @@ describe('Module', () => {
     })
 
     describe('Context#unregisterModule', () => {
+      it('should call unregister hook', () => {
+        const before = jest.fn()
+        const after = jest.fn()
+
+        Context.hooks['module:unregister'].attach((data, _, next) => {
+          before()
+          next()
+          after()
+        })
+        context.registerModule('some/path')
+        context.unregisterModule('some/path')
+
+        expect(before).toBeCalled()
+        expect(after).toBeCalled()
+      })
+
       it('should throw error if argument is not string or instance of Module', () => {
         expect(
           () => context.unregisterModule(makeClass('Invalid').build())
@@ -184,7 +216,7 @@ describe('Module', () => {
       expect(context._mutations['commit:some/path/command']).toBeDefined()
     })
 
-    it('should call register hook', () => {
+    it('should call registerCommand hook', () => {
       const before = jest.fn()
       const after = jest.fn()
       const Command = makeClass('Command').onInstance({
@@ -192,7 +224,7 @@ describe('Module', () => {
         commit() { }
       }).build()
 
-      Context.hooks['module:register'].attach((data, _, next) => {
+      Context.hooks['module:registerCommand'].attach((data, _, next) => {
         before()
         next()
         after()
@@ -235,7 +267,7 @@ describe('Module', () => {
       expect(Object.keys(mdl.getCommands()).length).toBe(0)
     })
 
-    it('should call unregister hook', () => {
+    it('should call unregisterCommand hook', () => {
       const before = jest.fn()
       const after = jest.fn()
       const Command = makeClass('Command').onInstance({
@@ -243,7 +275,7 @@ describe('Module', () => {
         commit() { }
       }).build()
 
-      Context.hooks['module:unregister'].attach((_, __, next) => {
+      Context.hooks['module:unregisterCommand'].attach((_, __, next) => {
         before()
         next()
         after()
