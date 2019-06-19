@@ -15,8 +15,7 @@
     "lint": "eslint src tests",
     "test": "export NODE_ENV=testing && jest",
     "docs:dev": "vuepress dev docs",
-    "docs:build": "vuepress build docs",
-    "prepare": "rollup --config"
+    "docs:build": "vuepress build docs"
   },
   "author": "Aleksandar Vucic",
   "license": "MIT",
