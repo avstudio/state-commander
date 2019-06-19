@@ -8,7 +8,7 @@
   "files": [
     "dist"
   ],
-  "repository": "https://github.com/avstudio/stcomm",
+  "repository": "https://github.com/avstudio/state-commander",
   "scripts": {
     "build": "input=index output=state-commander node  build/build.main.js",
     "dev": "npm run build && node examples/server.js",
