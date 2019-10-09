@@ -4,4 +4,6 @@
 
 JS Library for application state management
 
-## More info soon
+## Getting started
+
+https://state-commander.herokuapp.com
